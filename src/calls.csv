@@ -1,0 +1,20 @@
+call_id,timestamp,summary,transcript,recording_url,chat_log
+695a01ce-bc3a-40be-9d1f-c991f39d866f,2025-05-17T02:07:25.060887,"Riley from Dataverse called to confirm information but the call ended prematurely when Akash provided only partial information (possibly ""103"") instead of his full name and mobile number as requested.","AI: Hey. I am Riley from Dataverse. I just wanted to have a quick confirmation.
+User: Hey. What's the name?
+AI: Could you please provide your full name?
+User: Akash.
+AI: Thank you, Akash. Could you please provide me with your full name and mobile number?
+User: 1 0 3.
+AI: It's seems like I need your full name and your mobile number in
+User: Yeah. Full numb full is 1 0 3.
+AI: I apologize, but I need your full
+",https://storage.vapi.ai/695a01ce-bc3a-40be-9d1f-c991f39d866f-1747427841823-b19e28db-e198-46b9-92ee-ea6ed0b450d7-mono.wav,"[System]: Ask for their full name and their mobile number and re-confirm once and save the full name and mobile number as well after they speak it.
+[Bot]: Hey. I am Riley from Dataverse. I just wanted to have a quick confirmation.
+[User]: Hey. What's the name?
+[Bot]: Could you please provide your full name?
+[User]: Akash.
+[Bot]: Thank you, Akash. Could you please provide me with your full name and mobile number?
+[User]: 1 0 3.
+[Bot]: It's seems like I need your full name and your mobile number in
+[User]: Yeah. Full numb full is 1 0 3.
+[Bot]: I apologize, but I need your full"
