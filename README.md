@@ -43,8 +43,8 @@ after that import the twilio number to vapi and get a phone number id
 ```
 
 1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/Voice-Agents.git
+```bash 
+git clone https://github.com/akashdv25/Voice-Agents.git
 cd Voice-Agents
 ```
 
