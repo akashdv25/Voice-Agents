@@ -14,12 +14,14 @@ A powerful AI voice agent system that handles automated calls using VAPI and Twi
 ## 🏗️ Architecture
 
 ```mermaid
+
 graph LR
-    A[make_call.py (Make Call Script)] -->|Initiates Call| B[Vapi API]
-    B -->|Uses| C[Twilio (Telephony)]
-    C -->|Connects Call To| D[Customer Phone]
-    B -->|Sends Webhook Events| E[FastAPI Webhook Server]
-    E -->|Parses and Logs Data| F[Local CSV File]
+    A["make_call.py (Make Call Script)"] -->|Initiates Call| B["Vapi API"]
+    B -->|Uses| C["Twilio (Telephony)"]
+    C -->|Connects Call To| D["Customer Phone"]
+    B -->|Sends Webhook Events| E["FastAPI Webhook Server"]
+    E -->|Parses and Logs Data| F["Local CSV File"]
+
 
 ```
 
