@@ -3,6 +3,8 @@ This script is used to update the assistant in vapi.
 We define the API key, assistant ID in the .env file.
 And hit the vapi api endpoint to update the assistant.
 
+only define the changes you want to update using the payload.
+
 Required Environment Variables:
     VAPI_TOKEN: str
     VAPI_ASSISTANT_ID: str
