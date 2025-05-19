@@ -1,66 +1,77 @@
-import requests
+
+'''
+We can use the vapi python library to make the call as well directly
+it abstracts the http calls and provides a more pythonic way to make the call.
+
+Args:
+    None
+
+Returns:
+
+    response: dict
+
+Required Environment Variables:
+    VAPI_TOKEN: str
+    VAPI_ASSISTANT_ID: str
+    PHONE_NUMBER_ID: str
+    CUSTOMER_NUMBER: str
+
+'''
+
+
 import os
+from vapi import Vapi
 from dotenv import load_dotenv
 
 load_dotenv()
 
-'''
-This script is used to make a call to a customer using the Vapi API.
-We define the API key, assistant ID,  and phone number ID in the .env file.
-And hit the vapi api endpoint to make the call.
+def make_call():
+    # Get environment variables
+    API_KEY = os.getenv("VAPI_TOKEN")
+    ASSISTANT_ID = os.getenv("VAPI_ASSISTANT_ID")
+    PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
+    CUSTOMER_NUMBER = "+917000120198"  
 
-We can use either vapi or twilio to make the call.
+    # Check if required environment variables are present
+    if not all([API_KEY, ASSISTANT_ID, PHONE_NUMBER_ID]):
+        print("Error: Missing required environment variables")
+        print(f"API_KEY: {'Present' if API_KEY else 'Missing'}")
+        print(f"ASSISTANT_ID: {'Present' if ASSISTANT_ID else 'Missing'}")
+        print(f"PHONE_NUMBER_ID: {'Present' if PHONE_NUMBER_ID else 'Missing'}")
+        return None
 
-'''
+    try:
+        # Initialize VAPI client
+        client = Vapi(token=API_KEY)
 
+        # Create call
+        call_data = {
+            "assistant_id": ASSISTANT_ID,
+            "phone_number_id": PHONE_NUMBER_ID,
+            "customer": {
+                "number": CUSTOMER_NUMBER
+            },
+        }
+        
+        response = client.calls.create(**call_data)
+        
+        print("\nCall initiated successfully!")
+        print("------------------------")
+        print(f"Call ID: {response.id}")
+        print(f"Status: {response.status}")
+        print(f"Created At: {response.created_at}")
+        print(f"Phone Call Provider: {response.phone_call_provider}")
+        print(f"Provider Call ID: {response.phone_call_provider_id}")
+        if response.monitor:
+            print(f"Monitor Listen URL: {response.monitor.listen_url}")
+        print("------------------------\n")
+        
+        return response
+        
 
-API_KEY = os.getenv("VAPI_TOKEN")
-ASSISTANT_ID = os.getenv("VAPI_ASSISTANT_ID")
-CUSTOMER_NUMBER = "+919340409612"
-PHONE_NUMBER_ID=os.getenv("PHONE_NUMBER_ID")
+    except Exception as e:
+        print(f"Error making call: {e}")
+        return None
 
-
-
-url = "https://api.vapi.ai/call"
-
-headers = {
-    "Authorization": f"Bearer {API_KEY}",
-    "Content-Type": "application/json"
-}
-
-payload = {
-    "assistantId": ASSISTANT_ID,
-    "phoneNumberId": PHONE_NUMBER_ID,
-    "customer": {
-        "number": CUSTOMER_NUMBER
-    }
-}
-
-response = requests.post(url, headers=headers, json=payload)
-
-print(f"Status: {response.status_code}")
-print("Response:", response.json())
-
-
-
-'''
-We can use the vapi python library to make the call as well directly
-it abstracts the api calls and provides a more pythonic way to make the call.
-'''
-
-
-# from vapi import Vapi
-
-# client = Vapi(token='API_KEY')
-
-# call_data = {
-#     "assistant_id": 'ASSISTANT_ID',
-#     "phone_number_id": 'PHONE_NUMBER_ID',
-#     "customer": {
-#         "number": CUSTOMER_NUMBER
-#     },
-#     "name": "My Outbound Call"
-# }
-# response = client.calls.create(**call_data)
-
-# print(response)
+if __name__ == "__main__":
+    make_call()
