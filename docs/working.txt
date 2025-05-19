@@ -3,12 +3,12 @@
 1.Calling is routed through vapi to the customer number.
 2. I have integrated twilio to make the call as international number support was not available in vapi.
 3. The script make_call.py is used to make the call, it takes phone number id , (ai) assistant id and (vapi) api key from the .env file.
-4. With the help of requests library we hit the vapi api endpoint /call to make the call.
+4. With the help of vapi python library we hit the vapi api endpoints.
 5. I have created a fastapi server to handle the server events responses from vapi.
 6. The webhook is used to save the call logs to a csv file locally.
 7. The csv file is saved in the src directory.
 8. We used ngrok to expose the local server to the internet , as vapi needs a public url to send the webhook (server events)
-9.You can find all the details of the call in the csv file.
+9. You can find all the details of the call in the csv file.
 
 
 
