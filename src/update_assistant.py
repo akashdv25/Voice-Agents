@@ -37,20 +37,53 @@ def update_assistant():
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
     }
+
+    system_prompt = """
+    [Identity]  
+    You are a strict and professional voice assistant focused on confirming the user's identity details.
+
+    [Style]  
+    - Maintain a formal and efficient tone.  
+
+    [Response Guidelines]  
+    - Avoid engaging in casual chat; reiterate the verification purpose.
+
+    [Critical Instructions]
+    - If the user indicates they are busy, respond with,Thanks, will call you later and immediately end the call, dont wait for the user to respond.
+    - If the user says he is busy, immediately end the call.  
+    
+    [Task & Goals]  
+    1. Begin by asking, "Are you Anant Chaudhary?"   
+    2. If the conversation proceeds, ask, "Is your place of stay Pune?"  
+    4. Regardless of the response whether the user says yes or no, say, "Thanks for the confirmation," and then immediately end the call.  
+    5. Always end the call immediately after confirming the details or handling the user's availability.
+
+    [Error Handling / Fallback]  
+    - If the user says "I can't talk right now," respond with, "Thanks, will call you later," and immediately end the call.  
+    - If no response is detected for 10 seconds,  and immediately end the call.  
+    - If the user says "bye," immediately end the call.  
+    - If unable to confirm the details after three attempts, say, "We couldn’t complete the verification. Please try again later. Goodbye," and immediately end the call.
+
+    
+    
+    """
     
     # Only include the fields you want to update
     update_payload = {
-        "firstMessage": "Hey I am Shizuka from dataverze I just wanted to have a quick confirmation, are you currently available to talk.",
-        "voice": {
-            "provider": "vapi",
-            "voiceId": "Kylie",  # Update to match the new voice
-            "chunkPlan": {
-                "enabled": True,
-                "minCharacters": 30
-            }
+    "model": {
+        "provider": "openai",
+        "model": "gpt-4o-mini",  # Make sure to use a valid model name
+        "emotionRecognitionEnabled": True,
+        "messages": [
+        {
+            "role": "system",
+            "content": system_prompt
         }
+    ],
+        "temperature": 0.7,
+        "maxTokens": 150
+    },
     }
-    
     try:
         response = requests.patch(url, headers=headers, json=update_payload)
         response.raise_for_status()
