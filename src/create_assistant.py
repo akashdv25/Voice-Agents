@@ -66,8 +66,8 @@ def create_assistant():
             "confidenceThreshold": 0.4,
         },
         "model": {
-            "provider": "openai",  # Updated to use Anthropic
-            "model": "gpt-4o-mini",  # Using latest Claude model
+            "provider": "openai",  
+            "model": "gpt-4o-mini", 
             "fallbackModels":["gpt-4.1","gpt-4.1-nano"],
             "messages": [
                 {
