@@ -38,6 +38,8 @@ def update_assistant():
         "Content-Type": "application/json"
     }
 
+    # ---mention your changes in prompt as well as payload---
+
     system_prompt = """
     [Identity]  
     You are a strict and professional voice assistant focused on confirming the user's identity details.
@@ -70,19 +72,7 @@ def update_assistant():
     
     # Only include the fields you want to update
     update_payload = {
-    "model": {
-        "provider": "openai",
-        "model": "gpt-4o-mini",  # Make sure to use a valid model name
-        "emotionRecognitionEnabled": True,
-        "messages": [
-        {
-            "role": "system",
-            "content": system_prompt
-        }
-    ],
-        "temperature": 0.7,
-        "maxTokens": 150
-    },
+    # ---mention your payload here---
     }
     try:
         response = requests.patch(url, headers=headers, json=update_payload)

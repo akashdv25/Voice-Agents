@@ -49,8 +49,16 @@ def make_call():
             "assistant_id": ASSISTANT_ID,
             "phone_number_id": PHONE_NUMBER_ID,
             "customer": {
-                "number": CUSTOMER_NUMBER
+                "number": "+917000120198"
             },
+    #         "customers": [
+    #     {
+    #         "number": "+917000120198"
+    #     },
+    #     {
+    #         "number": "+918076120997"
+    #     }
+    # ],
         }
         
         response = client.calls.create(**call_data)

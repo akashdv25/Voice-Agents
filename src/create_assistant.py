@@ -14,8 +14,6 @@ Returns:
 
 """
 
-
-
 import requests
 import os
 from dotenv import load_dotenv
@@ -49,69 +47,79 @@ def create_assistant():
     1. Greet the user and ask, "Are you Anant Chaudhary?" <wait for the response>  
     2. If the user indicates they are busy, respond with, "Thanks, will call you later," and silently end the call.  
     3. If the conversation proceeds, ask, "Is your place of stay Pune?"  
-    4. Regardless of the response, say, "Thanks for the confirmation," and then silently end the call.  
-    5. Always end the call silently after confirming the details or handling the user's availability.
+    4. After confirming end the call with end_call tool
 
     [Error Handling / Fallback]  
     - If the user says "I can't talk right now," respond with, "Thanks, will call you later," and silently end the call.  
     - If no response is detected for 5 seconds, say "No response detected," and silently end the call.  
     - If the user says "bye," silently end the call.  
-    - If unable to confirm the details after three attempts, say, "We couldn’t complete the verification. Please try again later. Goodbye," and silently end the call.
+    - If unable to confirm the details after three attempts, say, "We couldn't complete the verification. Please try again later. Goodbye," and silently end the call.
 
 """
     
     payload = {
-    "name": "Dataverze Customer Support Assistant",
-    "transcriber": {
-        "provider": "deepgram",
-        "language": "en",
-        "model": "nova-3"
-       
-    },
-    "model": {
-        "provider": "openai",
-        "model": "gpt-4",  # Make sure to use a valid model name
-        "emotionRecognitionEnabled": True,
-        "messages": [
+        "name": "Sasha",
+        "transcriber": {
+            "provider": "deepgram",
+            "model": "nova-3",
+            "language": "en",
+            "confidenceThreshold": 0.4,
+        },
+        "model": {
+            "provider": "openai",  # Updated to use Anthropic
+            "model": "gpt-4o-mini",  # Using latest Claude model
+            "fallbackModels":["gpt-4.1","gpt-4.1-nano"],
+            "messages": [
+                {
+                    "role": "system",
+                    "content": system_prompt
+                }
+            ],
+            "temperature": 0.2,
+            "maxTokens": 250,
+            "tools": [
         {
-            "role": "system",
-            "content": system_prompt
+            "type": "endCall",
+            "function": {
+                "name": "end_call",
+                "description": "End the current call",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "message": {
+                            "type": "string",
+                            "description": "ummm...Thanks ...Have a Great Day"
+                        }
+                    }
+                }
+            }
         }
-    ],
-        "temperature": 0.7,
-        "maxTokens": 150
-    },
-    "voice": {
-        "provider": "vapi",
-        "voiceId": "Kylie",  
-        "chunkPlan": {
-            "enabled": True,
-            "minCharacters": 30
-        }
-    },
-    "firstMessage": "Hey I am Shizuka from dataverze I just wanted to have a quick confirmation, are you currently available to talk.",
-    "firstMessageMode": "assistant-speaks-first",
-    "monitorPlan": {
-        "listenEnabled": True,
-        "controlEnabled": True
-    },
-    "silenceTimeoutSeconds": 10,
-    "endCallMessage": "Thanks for the confirmation , Have a great day",
-    "endCallPhrases": [
-        "bye", 
-        "goodbye",
-        "see you later",
-        "Have a great day"
+    ]
+        },
+        "voice": {
+            "provider": "vapi",  
+            "voiceId": "Neha",  
+            "cachingEnabled": True,
+
+        },
+        "firstMessage": "Hey I am Sasha from dataverze I just wanted to have a quick confirmation, are you currently available to talk.",
+        "firstMessageMode": "assistant-speaks-first",
+        "silenceTimeoutSeconds": 10,
+        "maxDurationSeconds": 30,  
+        "endCallMessage": "um..thanks for your time , have a great day",
+        "endCallPhrases": [
+            "bye", 
+            "goodbye",
+            "see you later",
+            "Have a great day"
         ],
-    "artifactPlan": {
-        "recordingEnabled": True,
-        "transcriptPlan": {
-            "enabled": True,
-            "assistantName": "AI Assistant",
-            "userName": "Customer"
-        }
+        
+        "monitorPlan": {
+            "listenEnabled": True,
+            "controlEnabled": True
+        },
     }
-}
+
     try:
         response = requests.post(url, headers=headers, json=payload)
         response.raise_for_status()
@@ -137,9 +145,6 @@ def create_assistant():
     except requests.exceptions.RequestException as e:
         print(f"Error creating assistant: {e}")
         return None
-
-
-
 
 if __name__ == "__main__":
     create_assistant()
