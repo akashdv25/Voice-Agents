@@ -47,6 +47,12 @@ def make_call():
         # Create call
         call_data = {
             "assistant_id": ASSISTANT_ID,
+            "assistant_overrides": {
+                "variable_values": {
+                    "name": "Sakshi malhotra",
+                    "place": "Pune"
+                }
+            },
             "phone_number_id": PHONE_NUMBER_ID,
             "customer": {
                 "number": "+917000120198"

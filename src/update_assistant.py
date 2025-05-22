@@ -74,6 +74,7 @@ def update_assistant():
     update_payload = {
     # ---mention your payload here---
     }
+    
     try:
         response = requests.patch(url, headers=headers, json=update_payload)
         response.raise_for_status()

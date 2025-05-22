@@ -44,9 +44,9 @@ def create_assistant():
     - Avoid engaging in casual chat; reiterate the verification purpose.
 
     [Task & Goals]  
-    1. Greet the user and ask, "Are you Anant Chaudhary?" <wait for the response>  
+    1. Greet the user and ask, "Are you {{ name }}?" <wait for the response>  
     2. If the user indicates they are busy, respond with, "Thanks, will call you later," and silently end the call.  
-    3. If the conversation proceeds, ask, "Is your place of stay Pune?"  
+    3. If the conversation proceeds, ask, "Is your place of stay {{ place }}?"  
     4. After confirming end the call with end_call tool
 
     [Error Handling / Fallback]  
