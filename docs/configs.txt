@@ -1,0 +1,18 @@
+# for making a call
+
+- generate a number i created through twilio and enabled sip trunk for that number using post requests
+- create a assistant 
+- attach the assistant with the number 
+- give prompts to the Assistant
+- attach end_call tool to the assistant
+- make the call request 
+- add timout seconds
+- add speaking plan i.e interuption while speaking and starting to speak again 
+- When Vapi dispatches events to a server, it must be able to reach the server via the open Internet 
+- We can use ngrok to forward the local server to the internet 
+- These events will go to the Ngrok URL & get tunnelled to our local machine.
+- We will see the event payloads come through locally & log them in our terminal.
+
+
+
+

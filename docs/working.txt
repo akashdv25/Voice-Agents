@@ -11,11 +11,367 @@
 9. You can find all the details of the call in the csv file.
 
 
+# Working core models
+At it’s core, Vapi is an orchestration layer over three modules:
+the transcriber (Speech-to-Text), the model (llm), and the voice.(Text-to-Speech)
+
+# Orchestration Models
+The following are the models we currently run, with many more coming soon:
+
+* Endpointing – Detects exactly when the user finishes speaking.
+* Interruptions – Lets users cut in and interrupt the assistant.
+* Background noise filtering – Cleans up ambient noise in real-time.
+* Background voice filtering – Ignores speech from TVs, echoes, or other people.
+* Backchanneling – Adds affirmations like “yeah” or “got it” at the right moments.
+* Emotion detection – Detects user tone and passes emotion to the LLM.
+* Filler injection – Adds “um”, “like”, “so” and other natural fillers to assistant responses.
+
+
+# vapi also supports custom made functions that we can make and use in the assistant , 
+in the inbound call we can make a database to store the call recording summary etc and if
+it recieves call from the same number next time vapi can refer to it and use it as a context,
+rather than starting from scratch.
+
+## Dynamic variables in the system prompt or any message in the dashboard with double curly braces (e.g., {{name}}).
+
+To set values, make a phone call request through the API and set assistantOverrides. You cannot set variable values directly in the dashboard.
+
+For example, set the assistant’s first message to “Hello, {{name}}!” and assign name to John by passing assistantOverrides with variableValues:
+
+{
+  "variableValues": {
+    "name": "John"
+  }
+}
+
+Using dynamic variables in a phone call
+
+1.Prepare Your Request
+Create a JSON payload with these key-value pairs:
+
+* assistantId: Replace "your-assistant-id" with your assistant’s actual ID.
+* assistantOverride: Customize your assistant’s behavior.
+* variableValues: Include dynamic variables in the format { "variableName": "variableValue" }. Example: { "name": "John" }.
+* customer: Represent the call recipient.
+* number: Replace "+1xxxxxxxxxx" with the recipient’s phone number (E.164 format).
+phoneNumberId: Replace "your-phone-id" with your registered phone number’s ID. Find it on the Phone number page.
+
+2.Send the Request
+Send the JSON payload to the /call/phone endpoint using your preferred method (e.g., HTTP POST request).
+
+{
+  "assistantId": "your-assistant-id",
+  "assistantOverrides": {
+    "variableValues": {
+      "name": "John"
+    }
+  },
+  "customer": {
+    "number": "+1xxxxxxxxxx"
+  },
+  "phoneNumberId": "your-phone-id"
+}
+
+
+## Default Variables
+These variables are automatically filled based on the current (UTC) time, so you don’t need to set them manually in variableValues:
+
+Variable	           Description	                           Example
+{{now}}	               Current date and time (UTC)	           Jan 1, 2024 12:00 PM
+{{date}}	           Current date (UTC)	                   Jan 1, 2024
+{{time}}	           Current time (UTC)	                   12:00 PM
+{{month}}	           Current month (UTC)	                   January
+{{day}}	               Current day of month                    (UTC)	1
+{{year}}	           Current year (UTC)	                   2024
+{{customer.number}}	   Customer’s phone number	               +1xxxxxxxxxx
+{{customer.X}}	       Any other customer property	
+
+
+## multilingual support
+
+Vapi supports multiple languages. You can set the language in the assistant settings.
+
+
+## Personalization with user information
+Personalization lets you include customer-specific information in your voice assistant conversations. When a customer calls, your server can provide data about that customer, which is then used to tailor the conversation in real time.
+
+How Personalization Works
+1. Customer Calls Your Number
+When a call comes in, Vapi sends a request to your server instead of using a fixed assistant configuration.
+
+2. Your Server Looks Up the Caller
+Your server receives the request, identifies the caller (for example, by phone number), and fetches relevant customer data from your database or CRM.
+
+3. Your Server Responds with Assistant Details
+Your server responds to Vapi with either:
+
+An existing assistant ID and a set of dynamic variables to personalize the conversation, or
+A complete assistant configuration, with customer data embedded directly in the prompts or instructions.
+
+
+# stop speaking plan
+we can configure this setting for how long the user speaks before the assistant stops to speak.
+
+
+# start speaking plan
+we can configure this setting for how long to wait before the assistant starts to speak after the user has finished speaking.
+
+#Voice Fallback Plan
+Voice fallback plans give you the ability to continue your call in the event that your primary voice fails. Your assistant will sequentially fallback to only the voices you configure within your plan, in the exact order you specify.
+
+- How It Works
+When a voice failure occurs, Vapi will:
+
+- Detect the failure of the primary voice
+- If a custom fallback plan exists:
+- Switch to the first fallback voice in your plan
+- Continue through your specified list if subsequent failures occur
+- Terminate only if all voices in your plan have failed
+
+
+- Add the fallbackPlan property to your assistant’s voice configuration, and specify the fallback voices within the voices property.
+
+Please note that fallback voices must be valid JSON configurations, and not strings.
+The order matters. Vapi will choose fallback voices starting from the beginning of the list.
+
+{
+  "voice": {
+    "provider": "openai",
+    "voiceId": "shimmer",
+    "fallbackPlan": {
+        "voices": [
+            {
+                "provider": "cartesia",
+                "voiceId": "248be419-c632-4f23-adf1-5324ed7dbf1d"
+            },
+            {
+                "provider": "playht",
+                "voiceId": "jennifer"
+            }
+        ]
+    }
+  }
+}
+
+
+# Cloud Providers
+Vapi stores recordings of conversations with assistants in the cloud.
+By default, Vapi stores these recordings in its own bucket in Cloudflare R2.
+
+You can configure Vapi to store recordings in your own bucket in AWS S3, GCP, or Cloudflare R2.
+
+# bring your own server 
+
+our llm can be deployed on our own server  and vapi can send stt requests which it gets from the user and here lllm can do 
+the work instead of using the llm through vapi's server
+
+setting up your Custom LLM to simply generate conversation responses. In this mode, your LLM receives conversation details, asks the 
+model for a reply, and streams that text back.
+
+
+# vapi also supports sip integration
+
+## 1.Telephony
+
+| Era                                               | How calls travel                                                                             | Buzzwords you’ll hear                 |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------- |
+| **Analog / “Plain Old Telephone Service” (POTS)** | Voices ride as electrical signals over copper wires.                                         | Land-line, dial-tone, PSTN            |
+| **Digital PBX (1990s)**                           | Inside a company, calls are digital; outside they still exit on copper.                      | T1/E1, ISDN, PRI, PBX                 |
+| **IP Telephony / VoIP (2000s →)**                 | Voice is chopped into packets and sent over data networks—exactly like email or web traffic. | VoIP, SIP, RTP, soft-phone, cloud PBX |
+
+
+#2. Session initation protocol (SiP)
+
+* What it is: A signaling protocol defined by the IETF (RFC 3261) that says how to start, manage, and end a real-time session (voice, video, messaging).
+
+* What it isn’t: It doesn’t carry the actual audio; that’s usually RTP. SIP is the call-setup handshake: “ring this number,” “accept,” “hang up,” “hold,” etc.
+
+* Analogy: SIP = the maître-d’ taking your reservation; RTP = the waiter bringing your meal (the audio stream).
+
+
+#3. Real-time transport protocol (RTP)
+
+* What it is: A protocol for transmitting audio and video over IP networks
+
+* What it isn’t: It doesn’t set up the call; that’s SIP’s job. RTP just carries the audio.
+
+#4. Sip trunk & trunking
+
+SIP Trunk
+A virtual phone line that travels over an IP link and speaks SIP. One trunk can provide many channels (simultaneous calls).
+
+SIP Trunking
+The service or technique of delivering those trunks to you. Think of it as “VoIP dial-tone delivered by an ISP-style provider.”
 
 
 
+| Physical World                                                         | IP World                                                                |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| A bundle of copper pairs called a **PRI/T1 trunk** with 23–30 channels | A **SIP trunk** delivered on the same Ethernet that feeds your Internet |
+
+
+#4. Why Businesses Love SIP Trunking
+* Cost – No per-line copper rental; calls ride the Internet/VPN.
+* Scalability – Add 10 channels in software; no truck roll.
+* Global presence – Buy local numbers in dozens of countries instantly.
+* Unified comms – Voice, video, chat flow through one backbone.
+
+| Type                   | Cost/Month (approx) | Notes                    |
+| ---------------------- | ------------------- | ------------------------ |
+| Traditional PRI line   | ₹3,000–₹10,000      | For 30 calls max         |
+| SIP trunk (5 channels) | ₹1,000–₹3,000       | Scalable & cloud-based   |
+| Local call via SIP     | ₹0.05 – ₹0.30/min   | Much cheaper than mobile |
+| International via SIP  | ₹0.50 – ₹2.00/min   | Vs ₹5+ on normal calls   |
+
+
+| SIP Trunking Is...     | Compared to Normal Calls      |
+| ---------------------- | ----------------------------- |
+| ✅ Cheaper long term    | ✅                           |
+| ✅ More scalable        | ✅                           |
+| ✅ Cloud/internet based | ✅                           |
+| ❌ Needs good internet  | ⚠️                           |
+| ❌ Needs setup/config   | ⚠️ (But once done, it’s easy) |
+
+
+#5. SIP Trunking setup in twilio
+- create a sip trunk and create a termination sip uri after that , in the termination expose vapi's ip in the ip address section.
+- hit the /credential endpoint with the payload to create an id for enabling sip trunking then /phone number to make the sip trunking available for the phone number inside vapi
+- step by step guide - https://docs.vapi.ai/advanced/sip/twilio  
+
+# Default Tools
+
+## Vapi voice assistants are given additional functions: 
+transferCall,endCall, and dtmf (to dial a keypad with DTMF). 
+These functions can be used to transfer calls, hang up calls, and enter digits on the keypad.
+
+
+To add Default Tools to your agent, you need to add them in the tools array of your assistant. You can do this in your api request, or by creating a new tool in the dashboard 
+tools page, and assigning it to your assistant.
+
+# Transfer Call
+
+
+{
+  "model": {
+    "provider": "openai",
+    "model": "gpt-3.5-turbo",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an assistant at a law firm. When the user asks to be transferred, use the transferCall function."
+      }
+    ],
+    "tools": [
+      {
+          "type": "transferCall",
+          "destinations" : {
+            {
+              "type": "number",
+              "number": "+16054440129"
+            }
+          }
+      }
+    ]
+  }
+}
 
 
 
+# End Call
 
+{
+  "model": {
+    "provider": "openai",
+    "model": "gpt-3.5-turbo",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an assistant at a law firm. If the user is being mean, use the endCall function."
+      }
+    ],
+    "tools": [
+      {
+          "type": "endCall"
+      }
+    ]
+  }
+}
+
+summary of default tools - https://docs.vapi.ai/tools/default-tools
+
+📞 1. Transfer Call (transferCall)
+Allows the assistant to transfer the ongoing call to a predefined destination. This is configured by including the transferCall tool in the assistant's toolset and specifying the destination number.
+
+📴 2. End Call (endCall)
+Enables the assistant to terminate the call based on certain conditions or triggers. To use this, include the endCall tool in the assistant's configuration.
+
+✉️ 3. Send Text (sms)
+Allows the assistant to send SMS messages during a call using a configured Twilio account. This requires adding the sms tool and specifying the sender's phone number
+
+4. Dial Keypad (DTMF) (dtmf)
+Enables the assistant to send DTMF tones, which are used to interact with automated phone systems (like pressing numbers on a keypad). Vapi's DTMF tool uses the in-band method, which may not be compatible with all IVR systems.
+
+# custom tools - https://docs.vapi.ai/tools/custom-tools
+## we can make custom tools by  refering the server url where the agent will send the request to example a weather api to fetch the latest weather upon 
+the user request , we can define end points in our server that the agent can hit 
+
+# Model Context Protocol (MCP) Integration
+The Model Context Protocol (MCP) integration allows your Vapi assistant to dynamically access tools from MCP servers during calls. This enables your assistant to:
+
+Connect to any MCP-compatible server
+Access tools dynamically at runtime
+Execute actions through the MCP server
+
+This powerful integration allows your assistant to leverage a wide range of tools without requiring individual integrations for each service.
+
+# knowledge bases 
+A Knowledge Base is a collection of custom files that contain information on specific topics or domains. By integrating a Knowledge Base into your voice AI assistant, you can enable it to provide more accurate and informative
+ responses to user queries based on your own data.
+ Knowledge Bases are available through both the Vapi API and dashboard.
+use knowledgebase with query tool to fetch the information from the knowledge base.
+
+Why Use a Knowledge Base?
+Using a Knowledge Base with your voice AI assistant offers several benefits:
+
+Improved accuracy: Your assistant can provide responses based on your verified information rather than general knowledge.
+Enhanced capabilities: A Knowledge Base enables your assistant to answer complex domain-specific queries with detailed, contextually relevant responses.
+Customization: With a Knowledge Base, you can tailor your assistant’s responses to specific domains or topics, making it more effective for your particular use case.
+Up-to-date information: You control the content, ensuring your assistant always has access to the latest information.
+
+
+## Server URLs
+
+
+Server URLs allow your application to receive data & communicate with Vapi during conversations. Conversation events can include:
+
+- Status Updates: updates on the status of a call
+- Transcript Updates: call transcripts
+- Function Calls: payloads delivered when your assistant wants certain actions executed
+- Assistant Requests: in certain circumstances, Vapi may ping your server to get dynamic configuration for an assistant handling a specific call
+- End of Call Report: call summary data at the end of a call
+- Hang Notifications: get notified when your assistant fails to reply for a certain amount of time
+
+
+
+Webhooks
+Developing Locally
+
+Learn how to receive server events in your local development environment.
+
+The Problem
+When Vapi dispatches events to a server, it must be able to reach the server via the open Internet.
+
+If your API is already live in production, it will be accessible via a publicly known URL. But, during development, your server will often be running locally on your machine.
+
+localhost is an alias for the IP address 127.0.0.1. This address is called the “loopback” address and forwards the network request within the machine itself.
+
+To receive server events locally, we will need a public address on the Internet that can receive traffic and forward it to our local machine.
+
+## Server Authentication
+- When configuring webhooks for your assistant, you can authenticate your server endpoints using either a secret token, custom headers, or OAuth2. This ensures that only 
+  authorized requests from Vapi are processed by your server.
+
+
+## websockets
+vapi supports websockets for receiving events from the assistant , wihch offer better performance and lower latency than http methods.
 
